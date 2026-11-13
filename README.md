@@ -39,6 +39,10 @@ The current application uses immutable public W component source pins; it needs
 no private package registry. Preserve the W-ID SDK/adapter pair and the cookie API
 version when upgrading. Generate and inspect Cargo locks and the archived frontend npm lock through
 public CI, then retain them in source before claiming a validated distribution.
+SQLx retains the original default and explicit features, pinned to official commit
+`10462fa4414c6c7f1ed1d39bb31678e3b726878c` so its optional SQLite lock
+dependency can resolve a patched libsqlite3-sys. The complete current application
+lockfile remains subject to cargo-audit, including optional drivers.
 
 For an independently configured development environment:
 

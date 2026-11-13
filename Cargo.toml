@@ -26,7 +26,7 @@ tower = "0.5"
 tower-http = { version = "0.6", features = ["trace", "compression-gzip", "timeout", "limit"] }
 tower_governor = { version = "0.8", default-features = false, features = ["axum"] }
 governor = "0.10"
-sqlx = { version = "0.9", features = ["runtime-tokio", "postgres", "chrono", "uuid", "migrate", "json"] }
+sqlx = { version = "=0.9.0", git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c", features = ["runtime-tokio", "postgres", "chrono", "uuid", "migrate", "json"] }
 w-storage = { version = "=0.1.5", git = "https://github.com/W-World-Labs/w-commons", rev = "f7eb2a85af8409340d094807c22ab7f24cf50913", default-features = false, features = ["presign", "s3"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }

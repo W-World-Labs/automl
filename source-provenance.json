@@ -60,5 +60,13 @@
     "run": "https://github.com/W-World-Labs/automl/actions/runs/43518269964",
     "source_commit": "10e24c8f07e675c4b015d7cacfe3b12913ec7dcb",
     "sha256": "7de4aefd092ff638638ddd4a44abfa84ed90d21e7414776dcc89171d6489306d"
+  },
+  "current_cargo_lock_refresh": {
+    "status": "Pending native public CI resolution and independent artifact review",
+    "reason": "Original full-lock audit failed on optional libsqlite3-sys 0.37.0 (RUSTSEC-2026-0459); preserve the full-lock audit without advisory exceptions",
+    "sqlx_source": "https://github.com/launchbadge/sqlx",
+    "sqlx_commit": "10462fa4414c6c7f1ed1d39bb31678e3b726878c",
+    "features": "Original SQLx default and explicit features unchanged; no application or assertion changes",
+    "previous_failed_run": "https://github.com/W-World-Labs/automl/actions/runs/43519601971"
   }
 }
