@@ -29,7 +29,6 @@
     "OpenBB callers require implementation/configuration supplied separately through OPENBB_ROOT"
   ],
   "public_availability_holds": [
-    "The pinned @w/http-web public release URL must be available and match the reviewed archive before first publication",
     "Public CI must generate, review and commit native Cargo and archived npm lockfiles before complete application validation"
   ],
   "source_preservation": {
