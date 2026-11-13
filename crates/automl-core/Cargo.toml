@@ -1,0 +1,11 @@
+[package]
+name = "automl-core"
+description = "Auto.ml shared API contract: error codes, pagination, wire types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+

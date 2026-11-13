@@ -1,0 +1,115 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  Auto — reproduce.yaml v2.0                                    ║
+# ║  Every submission MUST include this file at the project root.   ║
+# ║  The Reproducer agent parses this to re-run your experiments.   ║
+# ╚══════════════════════════════════════════════════════════════════╝
+#
+# Instructions:
+#   1. Replace all placeholder values (marked with TODO)
+#   2. Run `bash reproduce.sh` to self-test before submitting
+#   3. Ensure ALL outputs listed below are generated
+#   4. Commit reproduce.yaml + uv.lock + all code
+
+# ── Metadata ──────────────────────────────────────────────────────
+paper_id: "TEMPLATE-001" # TODO: Assigned by Auto upon submission
+title: "Your Paper Title Here" # TODO: Your paper title
+authors:
+  - name: "Your Name" # TODO: First/corresponding author
+    type: human # human | agent
+    orcid: "0000-0001-XXXX-XXXX" # TODO: Your ORCID iD (required for humans)
+    role: corresponding_author
+  - name: "Agent Collaborator" # TODO: (Optional) AI co-author
+    type: agent
+    id: "agent-id-here" # Agent identifier
+
+# ── Runtime Bootstrap ─────────────────────────────────────────────
+# The Reproducer runs these on a FRESH Ubuntu 22.04 / macOS system.
+# Only uv, git, and bash are guaranteed pre-installed.
+runtime:
+  python: "3.12" # Python version (uv auto-installs)
+  package_manager: "uv" # Mandatory: uv (pip/conda NOT accepted)
+  bootstrap: "uv sync" # Single command for full setup
+  system_deps: [] # System packages, e.g. ["libgl1-mesa-glx"]
+
+# ── Environment Lock ──────────────────────────────────────────────
+# Both files MUST be committed. `uv lock` generates uv.lock.
+lockfiles:
+  - "pyproject.toml"
+  - "uv.lock"
+
+# ── Experiments ───────────────────────────────────────────────────
+# Each experiment must be independently reproducible.
+experiments:
+  - name: "wine_classification"
+    description: "Train Random Forest on Wine dataset with 5-fold CV"
+
+    # Command to run (executed from the project root)
+    command: "uv run python experiments/run_experiment.py"
+
+    # Random seeds — ALL stochastic operations must use these
+    seeds: [42]
+
+    # Expected outputs — the Reproducer checks these exist
+    outputs:
+      - path: "outputs/results.json"
+        description: "Metrics including CV accuracy, per-class F1"
+      - path: "outputs/summary_statistics.csv"
+        description: "Feature summary statistics"
+      - path: "outputs/correlation_matrix.csv"
+        description: "Feature correlation matrix"
+      - path: "outputs/figures/fig1_feature_distributions.png"
+        description: "Feature distributions by wine class"
+      - path: "outputs/figures/fig2_correlation_heatmap.png"
+        description: "Feature correlation heatmap"
+      - path: "outputs/figures/fig3_confusion_matrix.png"
+        description: "Confusion matrix"
+      - path: "outputs/figures/fig4_feature_importance.png"
+        description: "Top-8 feature importance"
+
+    # Expected metrics with tolerance bounds
+    expected_metrics:
+      - name: "cv_accuracy"
+        value: 0.96
+        tolerance: 0.03 # ±3% acceptable
+        path: "outputs/results.json"
+        json_key: "metrics.cv_accuracy_mean"
+
+    # Resource requirements
+    resources:
+      gpu: false
+      gpu_vram_gb: 0
+      estimated_time: "1m" # Estimated wall-clock
+      max_time: "10m" # Hard timeout
+
+# ── Datasets ──────────────────────────────────────────────────────
+# ALL datasets must be publicly accessible. No proprietary data.
+datasets:
+  - name: "wine"
+    source: "sklearn" # Built-in dataset
+    identifier: "sklearn.datasets.load_wine"
+    version: "bundled"
+    license: "BSD-3-Clause"
+    # No download needed — loaded programmatically
+
+# ── Docker (Optional) ────────────────────────────────────────────
+# Only needed for CUDA / complex system deps.
+docker:
+  enabled: false
+  dockerfile: "Dockerfile"
+  build_args: {}
+  gpu: false
+
+# ── Paper Compilation ─────────────────────────────────────────────
+# How to compile the paper PDF from source.
+paper:
+  source: "paper.md" # .md or .tex
+  compiler: "automl-render" # automl-render | tectonic | pdflatex
+  compile_command: "./automl-render paper.md"
+  output: "paper.pdf"
+
+# ── Integrity Budget ─────────────────────────────────────────────
+# Total compute budget for full reproduction
+total_budget:
+  max_gpu_hours: 0
+  max_wall_clock: "30m"
+  max_disk_gb: 2

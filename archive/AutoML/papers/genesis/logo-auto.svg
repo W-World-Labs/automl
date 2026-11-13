@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200">
+  <defs>
+    <!-- Premium Google Fonts: Outfit for the geometric bold look, Inter for the clean tagline -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@800&amp;family=Inter:wght@400;500&amp;display=swap');
+      
+      .brand-text {
+        font-family: 'Outfit', system-ui, sans-serif;
+        font-weight: 800;
+        font-size: 110px;
+        letter-spacing: -3px;
+        fill: #0F172A; /* Slate 900 */
+      }
+      
+      .dot {
+        fill: #06B6D4; /* Primary Electric Cyan */
+      }
+      
+      .ml-text {
+        font-family: 'Outfit', system-ui, sans-serif;
+        font-weight: 800;
+        font-size: 110px;
+        letter-spacing: -3px;
+        fill: #06B6D4; /* Primary Electric Cyan */
+      }
+      
+      .tagline {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-weight: 500;
+        font-size: 16px;
+        letter-spacing: 6px;
+        fill: #64748B; /* Slate 500 */
+        text-transform: uppercase;
+      }
+    </style>
+    
+    <!-- Gradients for the 3 folded steps (Bootstrapping concept) -->
+    <!-- Bottom step: Brightest Electric Cyan -->
+    <linearGradient id="gradStep1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+    
+    <!-- Middle step: Mid Cyan/Blue -->
+    <linearGradient id="gradStep2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+
+    <!-- Top step: Deep Slate Blue -->
+    <linearGradient id="gradStep3" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0369A1" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+
+    <!-- Shadow for depth -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Left: The Abstract Brand Mark (140x140 area) -->
+  <!-- Concept: Left foot stepping on right / Upward spiral fold -->
+  <!-- We use three sleek, overlapping angled folded bands ascending upwards and rightwards -->
+  <g transform="translate(30, 45)">
+    
+    <!-- Top Step (Back) -->
+    <path d="M 60 10 L 95 10 C 110 10, 120 20, 120 35 L 120 70 L 85 70 C 70 70, 60 60, 60 45 Z" fill="url(#gradStep3)" transform="matrix(0.866, -0.5, 0.5, 0.866, 0, 10)" filter="url(#shadow)"/>
+    
+    <!-- Middle Step -->
+    <path d="M 30 40 L 65 40 C 80 40, 90 50, 90 65 L 90 100 L 55 100 C 40 100, 30 90, 30 75 Z" fill="url(#gradStep2)" transform="matrix(0.866, -0.5, 0.5, 0.866, 0, 10)" filter="url(#shadow)"/>
+    
+    <!-- Bottom Step (Front) - Loop wrapping under -->
+    <path d="M 0 70 L 35 70 C 50 70, 60 80, 60 95 L 60 130 L 25 130 C 10 130, 0 120, 0 105 Z" fill="url(#gradStep1)" transform="matrix(0.866, -0.5, 0.5, 0.866, 0, 10)" filter="url(#shadow)"/>
+    
+    <!-- Inner fold cutout to create the 3D ribbon loop effect on the bottom step -->
+    <path d="M 22 105 C 22 93, 30 85, 42 85 L 50 85 L 50 115 C 50 127, 42 135, 30 135 L 22 135 Z" fill="#FFFFFF" transform="matrix(0.866, -0.5, 0.5, 0.866, 0, 10)" opacity="0.9"/>
+  </g>
+
+  <!-- Right: Typography -->
+  <text x="210" y="130" class="brand-text">Auto</text>
+  <text x="460" y="130" class="dot">.</text>
+  <text x="495" y="130" class="ml-text">ml</text>
+
+  <!-- Tagline below -->
+  <text x="215" y="170" class="tagline">The Universal Science Platform</text>
+  
+</svg>

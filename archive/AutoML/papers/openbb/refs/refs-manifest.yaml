@@ -1,0 +1,274 @@
+# Reference Evidence Package — GENESIS-001
+# ═══════════════════════════════════════════════════════════════
+# Auto.ml requires authors to provide verifiable source material
+# for EVERY cited reference. This manifest maps BibTeX keys to
+# their evidence files.
+#
+# Accepted evidence types (in order of preference):
+#   1. Original PDF      — publisher or preprint PDF
+#   2. HTML snapshot      — saved webpage (.html or .mhtml)
+#   3. Screenshot         — visible proof of publication (.png)
+#   4. DOI landing page   — saved as PDF or HTML
+#   5. Any document       — Word, EPUB, etc.
+#
+# Directory structure:
+#   refs/
+#   ├── refs-manifest.yaml    (this file)
+#   ├── sakana2025scientist.pdf
+#   ├── baker2016reproducibility.pdf
+#   ├── vaswani2017attention.pdf
+#   └── ...
+#
+# Naming convention: {bibtex_key}.{ext}
+# ═══════════════════════════════════════════════════════════════
+
+paper_id: "GENESIS-001"
+total_references: 30
+
+references:
+  # ── AI-Driven Scientific Discovery ──────────────────────────
+  - key: sakana2025scientist
+    url: https://arxiv.org/abs/2408.06292
+    evidence: sakana2025scientist.pdf
+    type: pdf
+
+  - key: sakana2025scientistv2
+    url: https://arxiv.org/abs/2504.08066
+    evidence: sakana2025scientistv2.pdf
+    type: pdf
+
+  - key: boiko2023autonomous
+    url: https://doi.org/10.1038/s41586-023-06792-0
+    evidence: boiko2023autonomous.pdf
+    type: pdf
+
+  - key: wang2023sciagent
+    url: https://doi.org/10.1038/s41586-023-06221-2
+    evidence: wang2023sciagent.pdf
+    type: pdf
+
+  # ── LLM Foundations ─────────────────────────────────────────
+  - key: vaswani2017attention
+    url: https://arxiv.org/abs/1706.03762
+    evidence: vaswani2017attention.pdf
+    type: pdf
+
+  - key: brown2020gpt3
+    url: https://arxiv.org/abs/2005.14165
+    evidence: brown2020gpt3.pdf
+    type: pdf
+
+  - key: openai2023gpt4
+    url: https://arxiv.org/abs/2303.08774
+    evidence: openai2023gpt4.pdf
+    type: pdf
+
+  - key: touvron2023llama
+    url: https://arxiv.org/abs/2302.13971
+    evidence: touvron2023llama.pdf
+    type: pdf
+
+  - key: team2023gemini
+    url: https://arxiv.org/abs/2312.11805
+    evidence: team2023gemini.pdf
+    type: pdf
+
+  # ── Agentic AI ──────────────────────────────────────────────
+  - key: yao2023react
+    url: https://arxiv.org/abs/2210.03629
+    evidence: yao2023react.pdf
+    type: pdf
+
+  - key: schick2024toolformer
+    url: https://arxiv.org/abs/2302.04761
+    evidence: schick2024toolformer.pdf
+    type: pdf
+
+  - key: wang2024survey_agents
+    url: https://arxiv.org/abs/2308.11432
+    evidence: wang2024survey_agents.pdf
+    type: pdf
+
+  - key: hong2024metagpt
+    url: https://arxiv.org/abs/2308.00352
+    evidence: hong2024metagpt.pdf
+    type: pdf
+
+  - key: qian2024chatdev
+    url: https://arxiv.org/abs/2307.07924
+    evidence: qian2024chatdev.pdf
+    type: pdf
+
+  # ── AI Peer Review ──────────────────────────────────────────
+  - key: checco2021ai_review
+    url: https://doi.org/10.1057/s41599-020-00703-8
+    evidence: checco2021ai_review.pdf
+    type: pdf
+
+  - key: liang2024monitoring
+    url: https://arxiv.org/abs/2403.07183
+    evidence: liang2024monitoring.pdf
+    type: pdf
+
+  - key: peerzero2026
+    url: https://peerzero.ai
+    evidence: peerzero2026.html
+    type: html
+
+  - key: moltbook2026
+    url: https://moltbook.com
+    evidence: moltbook2026.html
+    type: html
+
+  # ── Reproducibility ─────────────────────────────────────────
+  - key: baker2016reproducibility
+    url: https://doi.org/10.1038/533452a
+    evidence: baker2016reproducibility.pdf
+    type: pdf
+
+  - key: pineau2021improving
+    url: https://jmlr.org/papers/v22/20-303.html
+    evidence: pineau2021improving.pdf
+    type: pdf
+
+  - key: gundersen2018state
+    url: https://doi.org/10.1609/aaai.v32i1.11503
+    evidence: gundersen2018state.pdf
+    type: pdf
+
+  - key: stodden2016enhancing
+    url: https://doi.org/10.1126/science.aah6168
+    evidence: stodden2016enhancing.pdf
+    type: pdf
+
+  # ── Sandboxing ──────────────────────────────────────────────
+  - key: firecracker2020
+    url: https://www.usenix.org/conference/nsdi20/presentation/agache
+    evidence: firecracker2020.pdf
+    type: pdf
+
+  - key: docker2014
+    url: https://dl.acm.org/doi/10.5555/2600239.2600241
+    evidence: docker2014.pdf
+    type: pdf
+
+  - key: gvisor2019
+    url: https://gvisor.dev
+    evidence: gvisor2019.html
+    type: html
+
+  # ── Formal Verification ─────────────────────────────────────
+  - key: lean4
+    url: https://leanprover.github.io
+    evidence: lean4.html
+    type: html
+
+  - key: yang2024leandojo
+    url: https://arxiv.org/abs/2306.15626
+    evidence: yang2024leandojo.pdf
+    type: pdf
+
+  - key: trinh2024alphaproof
+    url: https://deepmind.google/discover/blog/ai-solves-imo-problems-at-silver-medal-level/
+    evidence: trinh2024alphaproof.html
+    type: html
+
+  # ── Biology ─────────────────────────────────────────────────
+  - key: alphafold2021
+    url: https://doi.org/10.1038/s41586-021-03819-2
+    evidence: alphafold2021.pdf
+    type: pdf
+
+  - key: abramson2024alphafold3
+    url: https://doi.org/10.1038/s41586-024-07487-w
+    evidence: abramson2024alphafold3.pdf
+    type: pdf
+
+  # ── Vision & NLP ────────────────────────────────────────────
+  - key: rombach2022stablediffusion
+    url: https://arxiv.org/abs/2112.10752
+    evidence: rombach2022stablediffusion.pdf
+    type: pdf
+
+  - key: dosovitskiy2021vit
+    url: https://arxiv.org/abs/2010.11929
+    evidence: dosovitskiy2021vit.pdf
+    type: pdf
+
+  - key: devlin2019bert
+    url: https://arxiv.org/abs/1810.04805
+    evidence: devlin2019bert.pdf
+    type: pdf
+
+  - key: achiam2023gpt4
+    url: https://arxiv.org/abs/2303.08774
+    evidence: achiam2023gpt4.pdf
+    type: pdf
+
+  # ── Distributed Computing ───────────────────────────────────
+  - key: boinc2004
+    url: https://doi.org/10.1109/GRID.2004.14
+    evidence: boinc2004.pdf
+    type: pdf
+
+  - key: dean2012mapreduce
+    url: https://proceedings.neurips.cc/paper/2012/hash/6aca97005c68f1206823815f66102863-Abstract.html
+    evidence: dean2012mapreduce.pdf
+    type: pdf
+
+  # ── FAIR & Open Science ─────────────────────────────────────
+  - key: wilkinson2016fair
+    url: https://doi.org/10.1038/sdata.2016.18
+    evidence: wilkinson2016fair.pdf
+    type: pdf
+
+  - key: nosek2015reproducibility
+    url: https://doi.org/10.1126/science.aac4716
+    evidence: nosek2015reproducibility.pdf
+    type: pdf
+
+  # ── Other ───────────────────────────────────────────────────
+  - key: ouyang2022instructgpt
+    url: https://arxiv.org/abs/2203.02155
+    evidence: ouyang2022instructgpt.pdf
+    type: pdf
+
+  - key: liang2023helm
+    url: https://arxiv.org/abs/2211.09110
+    evidence: liang2023helm.pdf
+    type: pdf
+
+  - key: arxiv1991
+    url: https://arxiv.org
+    evidence: arxiv1991.html
+    type: html
+
+  - key: semanticscholar
+    url: https://api.semanticscholar.org
+    evidence: semanticscholar.html
+    type: html
+
+  - key: openreview2014
+    url: https://openreview.net
+    evidence: openreview2014.html
+    type: html
+
+  - key: uv2024
+    url: https://github.com/astral-sh/uv
+    evidence: uv2024.html
+    type: html
+
+  - key: ionet2024
+    url: https://io.net
+    evidence: ionet2024.html
+    type: html
+
+  - key: pearl2009causality
+    url: https://doi.org/10.1017/CBO9780511803161
+    evidence: pearl2009causality.pdf
+    type: pdf
+
+  - key: moretti2013distant
+    url: https://www.versobooks.com/books/1421-distant-reading
+    evidence: moretti2013distant.html
+    type: html

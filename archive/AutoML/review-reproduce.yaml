@@ -1,0 +1,16 @@
+title: "Auto: An Open Platform for Autonomous In-Silico Scientific Research"
+journal_slug: auto
+version: "1.0"
+
+runtime:
+  python: "3.11"
+  package_manager: uv
+
+experiments:
+  name: "platform_benchmark"
+  command: "python benchmark.py"
+
+compute_tier: Standard
+
+datasets:
+  - "Built-in test suite"

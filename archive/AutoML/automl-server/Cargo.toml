@@ -1,0 +1,65 @@
+[package]
+name = "automl-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Auto.ml Rust API server — Axum + SQLite"
+
+[[bin]]
+name = "automl-server"
+path = "src/main.rs"
+
+[dependencies]
+# Web framework
+axum = { version = "0.8", features = ["multipart"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace", "limit", "fs"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres"] }
+
+# Storage (R2 via S3) — shared w-storage crate (rustls-on-ring, no aws-lc-sys)
+w-storage = { version = "=0.1.5", git = "https://github.com/W-World-Labs/w-commons", rev = "f7eb2a85af8409340d094807c22ab7f24cf50913", features = ["s3", "presign"] }
+bytes = "1"
+
+# Auth
+hmac = "0.12"
+sha2 = "0.10"
+# Bare lowercase-hex SHA-256 (api_keys key_hash + asset sha256/X-SHA256). Output
+# byte-identical to the prior `format!("{:x}", Sha256::digest(..))`. sha2 stays
+# for the truncated scholar-id (sessions.rs) and HMAC sites.
+w-crypto = { version = "=0.1.1", git = "https://github.com/W-World-Labs/w-commons", rev = "f7eb2a85af8409340d094807c22ab7f24cf50913", default-features = false, features = ["hash"] }
+w-id-sdk = { version = "=1.3.86", git = "https://github.com/W-World-Labs/w-id-sdk", rev = "4b9ae277f5a96b34469ccd3b6a9a62c5df699e32" }
+
+# Utils
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+anyhow = "1"
+thiserror = "2"
+base64 = "0.22"
+mime_guess = "2"
+dotenvy = "0.15"
+xradar = { version = "=0.3.11", git = "https://github.com/W-World-Labs/w-radar", rev = "579174832c5de9a1b606f82084171b3965deae56", features = ["axum"] }
+rust-embed = "8"
+
+# Shared axum scaffolding — CORS env-allowlist builder + SPA embedded-static
+# fallback + JSON WebError envelope. The RustEmbed struct + #[folder] stay local
+# (manifest-relative); spa.rs delegates to w_web_kit::spa_response. Guards mapped
+# faithfully: slash-only `api/`/`auth/`/`skills/`, bare `health`/`metrics`
+# (exact + `/…`). The `error`/`error-sqlx`/`error-anyhow` features back the
+# re-exported `ApiError = WebError` (envelope/status/From impls byte-identical to
+# the retired local error.rs).
+w-web-kit = { version = "=0.1.10", git = "https://github.com/W-World-Labs/w-commons", rev = "f7eb2a85af8409340d094807c22ab7f24cf50913", default-features = false, features = ["health", "openapi", "cors", "spa", "error", "error-sqlx", "error-anyhow"] }
+
+w-self-update = { version = "=0.2.4", git = "https://github.com/W-World-Labs/w-self-update", rev = "969957b207b780f91417781a1aaf42cfc9d65168" }
+
+[dev-dependencies]
+# rustls-only (no native-tls/openssl) — matches the all-rustls fleet mandate; the
+# bare default-features here was the sole native-tls puller (test builds only).
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

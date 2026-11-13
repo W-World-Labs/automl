@@ -1,0 +1,55 @@
+name: automl
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: automl-postgres18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-automl}
+      POSTGRES_USER: ${POSTGRES_USER:-automl}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-automl_dev_password}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55439}:5432"
+    volumes:
+      - automl_postgres18:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    container_name: automl-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-automl_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-automl_minio_dev_password}
+    ports:
+      - "127.0.0.1:${MINIO_PORT:-55445}:9000"
+    volumes:
+      - automl_minio:/data
+
+  create-bucket:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    restart: "no"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-automl_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-automl_minio_dev_password}
+      R2_BUCKET: ${R2_BUCKET:-automl-papers}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until mc alias set automl http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do
+          sleep 1
+        done
+        mc mb --ignore-existing "automl/$$R2_BUCKET"
+
+volumes:
+  automl_postgres18:
+  automl_minio:

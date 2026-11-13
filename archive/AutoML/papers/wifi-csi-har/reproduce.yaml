@@ -1,0 +1,133 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  Auto.ml — reproduce.yaml                                      ║
+# ║  AUTOML-26-00002: CSIFormer WiFi CSI HAR                        ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# ── Metadata ──────────────────────────────────────────────────────
+paper_id: "AUTOML-26-00002"
+title: "CSIFormer: Lightweight Transformer-based Human Activity Recognition from WiFi Channel State Information with ESP32-C6"
+journal_slug: "kindergarten"
+paper_type: "research"
+authors:
+  - name: "W Intelligence Lab"
+    type: human
+    orcid: "0000-0001-0000-0001"
+    role: corresponding_author
+
+# ── Research Chain ────────────────────────────────────────────────
+extends:
+  parent_paper_id: "GENESIS-001"
+  parent_version: "v1.0"
+  inherit:
+    - environment
+  contribution: "We extend the Auto.ml platform demonstration with a real research paper on WiFi CSI-based human activity recognition using a novel lightweight Transformer architecture."
+
+# ── Runtime ───────────────────────────────────────────────────────
+runtime:
+  python: "3.12"
+  package_manager: "uv"
+  bootstrap: "uv sync"
+
+# ── Environment Lock ─────────────────────────────────────────────
+lockfile:
+  pyproject: "pyproject.toml"
+  lock: "uv.lock"
+
+# ── Docker Reproduction ──────────────────────────────────────────
+docker:
+  platform_image: "automl/reproducer:latest"
+  run: "docker run --rm --gpus all --network none -v /path/to/wifi-csi-har:/submission:ro -v /output:/output automl/reproducer:latest"
+
+# ── Experiments ──────────────────────────────────────────────────
+experiments:
+  - name: "csi_har_benchmark"
+    description: "Train and evaluate 5 models (MLP, CNN, LSTM, CNN-GRU, CSIFormer) on 3 public CSI benchmarks + 1 self-collected dataset"
+    command: "uv run python experiments/run_experiment.py"
+    seed: 42
+    expected_metrics:
+      ut_har_csiformer_accuracy:
+        value: 0.95
+        tolerance: 0.03
+      ntu_fi_csiformer_accuracy:
+        value: 0.92
+        tolerance: 0.03
+      widar_csiformer_accuracy:
+        value: 0.90
+        tolerance: 0.05
+    expected_outputs:
+      - "outputs/results.json"
+      - "outputs/figures/fig1_csi_visualization.png"
+      - "outputs/figures/fig2_model_comparison.png"
+      - "outputs/figures/fig3_confusion_matrices.png"
+      - "outputs/figures/fig4_attention_heatmap.png"
+      - "outputs/figures/fig5_efficiency_plot.png"
+
+# ── Datasets ─────────────────────────────────────────────────────
+datasets:
+  - name: "UT-HAR"
+    source: github
+    repo: "ermongroup/Wifi_Activity_Recognition"
+    local_path: "data/ut_har/"
+    format: "csv"
+    size: "~2MB"
+    license: "MIT"
+    description: "University of Toronto HAR dataset (6 activities, 30 subcarriers × 3 antennas, Intel 5300)"
+
+  - name: "NTU-Fi-HAR"
+    source: github
+    repo: "xyanchen/WiFi-CSI-Sensing-Benchmark"
+    local_path: "data/ntu_fi/"
+    format: "csv"
+    size: "~50MB"
+    license: "MIT"
+    description: "NTU WiFi CSI dataset (6 activities, 114 subcarriers × 3 antennas, Atheros)"
+
+  - name: "Widar3.0-G6"
+    source: url
+    url: "https://ieee-dataport.org/open-access/widar-30-wifi-based-activity-recognition-dataset"
+    local_path: "data/widar/"
+    format: "mat"
+    size: "~200MB"
+    license: "CC-BY-4.0"
+    description: "Tsinghua Widar3.0 hand gesture dataset (6 gestures subset, 30 subcarriers × 3 antennas, Intel 5300)"
+
+  - name: "ESP32-C6-Collected"
+    source: local
+    local_path: "data/esp32_collected/"
+    format: "csv"
+    size: "~10MB"
+    license: "CC-BY-4.0"
+    description: "Self-collected dataset using ESP32-C6 + Xiaomi BE3600 router (6 activities, 52 subcarriers, WiFi 6 HT20)"
+
+# ── Resource Tier ────────────────────────────────────────────────
+resources:
+  tier: "Standard"
+  gpu: true
+  gpu_vram: "8GB"
+  estimated_time: "< 30 minutes"
+  disk: "< 500 MB"
+
+# ── Storage ──────────────────────────────────────────────────────
+storage:
+  cdn_domain: "artifacts.auto.ml"
+  paper_prefix: "papers/AUTOML-26-00002"
+  code_prefix: "code/AUTOML-26-00002"
+  data_prefix: "data/"
+
+# ── Paper Compilation ────────────────────────────────────────────
+paper:
+  source: "paper.tex"
+  compiler: "pdflatex"
+  compile_command: "latexmk -pdf paper.tex"
+
+# ── Reference Evidence ───────────────────────────────────────────
+references:
+  manifest: "refs/refs-manifest.yaml"
+  total: 25
+  coverage_target: 0.80
+
+# ── Telemetry ────────────────────────────────────────────────────
+telemetry:
+  enabled: true
+  endpoint: "https://auto.ml/api/telemetry/reproduction"
+  api_key: "${AUTOML_API_KEY}"

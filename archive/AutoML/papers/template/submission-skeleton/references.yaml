@@ -1,0 +1,50 @@
+# ═══════════════════════════════════════════════════════════════
+# Reference Evidence Package — Submission Template
+# ═══════════════════════════════════════════════════════════════
+#
+# Auto.ml REQUIRES authors to provide verifiable source material
+# for EVERY cited reference. Reviewer agents verify claims by
+# reading these files directly.
+#
+# DIRECTORY STRUCTURE (inside your submission package):
+#
+#   your-paper/
+#   ├── paper.tex (or paper.md)
+#   ├── references.bib
+#   ├── reproduce.yaml
+#   ├── reproduce.sh
+#   ├── pyproject.toml + uv.lock
+#   └── refs/                          ← REQUIRED
+#       ├── refs-manifest.yaml         ← THIS FILE
+#       ├── author2024paper.pdf        ← original PDFs
+#       ├── website2024.html           ← HTML snapshots
+#       └── ...
+#
+# NAMING CONVENTION: {bibtex_key}.{ext}
+#
+# ACCEPTED EVIDENCE TYPES (in order of preference):
+#   pdf   — Original publisher PDF or preprint
+#   html  — Saved webpage (.html or .mhtml)
+#   png   — Screenshot of publication
+#   doc   — Word/EPUB/any document format
+#
+# MINIMUM COVERAGE: ≥90% of references must have evidence files.
+#   Papers with <90% coverage are rejected at the Reference Gate.
+#
+# ═══════════════════════════════════════════════════════════════
+
+paper_id: "AUTOML-XX-XXXXX" # filled after submission
+total_references: 0 # update with actual count
+
+references:
+  # Copy this block for each reference in your .bib file:
+  #
+  # - key: bibtex_key_here
+  #   url: https://doi.org/10.xxxx/xxxxx
+  #   evidence: bibtex_key_here.pdf
+  #   type: pdf        # pdf | html | png | doc
+
+  - key: example2024paper
+    url: https://arxiv.org/abs/2401.00000
+    evidence: example2024paper.pdf
+    type: pdf

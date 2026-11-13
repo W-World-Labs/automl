@@ -1,0 +1,39 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  Auto — Submission pyproject.toml Template                     ║
+# ║  rename "automl-template" to your paper ID, e.g. "MY-PAPER-001"║
+# ║                                                                ║
+# ║  Usage:                                                        ║
+# ║    uv sync           → install all deps from uv.lock           ║
+# ║    uv run python ... → run scripts in isolated env             ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+[project]
+name = "automl-template"
+version = "1.0.0"
+description = "Your Paper Title Here"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "CC-BY-4.0" }
+
+authors = [
+    { name = "Your Name or Lab", email = "you@example.com" },
+]
+
+# ── Dependencies ──────────────────────────────────────────────────
+# List ALL packages your experiment code needs.
+# Use `uv add <package>` to add, then `uv lock` to regenerate uv.lock.
+# Avoid version ranges — pin exact versions for reproducibility.
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scikit-learn>=1.4",
+    "matplotlib>=3.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Tell hatchling this is a scripts-only project
+[tool.hatch.build.targets.wheel]
+packages = ["experiments"]

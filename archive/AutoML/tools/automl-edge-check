@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LIVE=0
+STRICT_RADAR=0
+BASE_URL="${AUTOML_TEST_BASE_URL:-https://auto.ml}"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --live)
+      LIVE=1
+      ;;
+    --strict-radar)
+      LIVE=1
+      STRICT_RADAR=1
+      ;;
+    --help|-h)
+      cat <<'USAGE'
+Usage: tools/automl-edge-check [--live] [--strict-radar]
+
+Runs the Auto.ml quality gates for production-facing work:
+  - frontend unit tests, lint, build, and npm audit
+  - Rust formatting and workspace tests
+  - optional live contract checks against AUTOML_TEST_BASE_URL or https://auto.ml
+  - optional Radar read-side context verification when a read API key is exported
+
+Options:
+  --live            Run live health, agent contract, CLI installer, and Radar context preflight.
+  --strict-radar    Require Radar read-side context verification to pass.
+USAGE
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 64
+      ;;
+  esac
+  shift
+done
+
+step() {
+  printf '\n==> %s\n' "$1"
+}
+
+run() {
+  step "$1"
+  shift
+  "$@"
+}
+
+find_workspace_tool() {
+  local cursor="$ROOT"
+  while [[ "$cursor" != "/" ]]; do
+    if [[ -x "$cursor/tools/w-radar-context" ]]; then
+      printf '%s\n' "$cursor/tools/w-radar-context"
+      return 0
+    fi
+    cursor="$(dirname "$cursor")"
+  done
+  return 1
+}
+
+radar_context_check() {
+  local tool
+  step "live Radar read context"
+
+  if ! tool="$(find_workspace_tool)"; then
+    echo "WARN: tools/w-radar-context was not found; Radar read-side context was not verified."
+    [[ "$STRICT_RADAR" == "1" ]] && return 64
+    return 0
+  fi
+
+  if [[ -z "${W_RADAR_API_KEY:-}${W_RADAR_API_KEY:-}" ]]; then
+    echo "WARN: W_RADAR_API_KEY is not exported; Radar read-side agent context was not verified."
+    echo "      Re-run with a read-scoped key: W_RADAR_API_KEY=... tools/automl-edge-check --live"
+    [[ "$STRICT_RADAR" == "1" ]] && return 64
+    return 0
+  fi
+
+  "$tool" automl
+}
+
+run "frontend unit tests" bash -lc "cd '$ROOT/automl-web' && npm test"
+run "frontend lint" bash -lc "cd '$ROOT/automl-web' && npm run lint"
+run "frontend production build" bash -lc "cd '$ROOT/automl-web' && npm run build"
+run "frontend dependency audit" bash -lc "cd '$ROOT/automl-web' && npm audit --audit-level=moderate"
+run "Rust formatting" bash -lc "cd '$ROOT' && cargo fmt --check"
+run "Rust workspace tests" bash -lc "cd '$ROOT' && cargo test"
+
+if [[ "$LIVE" == "1" ]]; then
+  run "live agent contract ($BASE_URL)" bash -lc "cd '$ROOT' && AUTOML_TEST_BASE_URL='$BASE_URL' cargo test -p automl-server --test live_contract -- --nocapture"
+
+  step "live health ($BASE_URL)"
+  if command -v jq >/dev/null 2>&1; then
+    curl -fsS "$BASE_URL/api/v1/health" | jq '{status, version, env, services}'
+  else
+    curl -fsS "$BASE_URL/api/v1/health"
+  fi
+
+  step "live CLI installer route"
+  curl -fsS "$BASE_URL/api/v1/cli/install" | head -n 5
+
+  radar_context_check
+fi
+
+printf '\nAuto.ml edge check complete.\n'

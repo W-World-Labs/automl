@@ -1,0 +1,17 @@
+title = "Auto.ml reviewed source boundary"
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Bibliography identifiers in original research reference manifests"
+condition = "AND"
+paths = ["archive/AutoML/papers/((genesis|openbb)/refs/refs-manifest\\.yaml)$"]
+regexTarget = "line"
+regexes = ["(?i)^\\s*-\\s*key:\\s*[a-z]+[0-9]{4}[a-z_0-9]*\\s*$"]
+
+[[allowlists]]
+description = "Exact synthetic webhook values used only by original loopback integration fixtures"
+condition = "AND"
+paths = ["crates/automl-server/tests/iteration6_integration\\.rs$"]
+regexTarget = "secret"
+regexes = ["^(receiver-secret-0123456789|flaky-secret-0123456789|0123456789abcdef)$"]

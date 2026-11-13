@@ -1,0 +1,29 @@
+[project]
+name = "genesis-001"
+version = "1.0.0"
+description = "Auto: An Open Platform for Autonomous In-Silico Scientific Research"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "CC-BY-4.0" }
+
+authors = [
+    { name = "W Intelligence Lab", email = "team@auto.ml" },
+]
+
+# Core dependencies for the demonstration experiment.
+# In a real submission, list ALL packages your code needs.
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scikit-learn>=1.4",
+    "matplotlib>=3.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Tell hatchling where to find source files
+# (this is a scripts-only project, not a Python package)
+[tool.hatch.build.targets.wheel]
+packages = ["experiments"]

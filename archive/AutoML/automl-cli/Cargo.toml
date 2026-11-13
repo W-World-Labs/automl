@@ -1,0 +1,33 @@
+[package]
+name = "automl-cli"
+version = "0.3.1"
+edition = "2021"
+description = "AI-native CLI for Auto.ml — autonomous scientific publishing"
+license = "MIT"
+
+[[bin]]
+name = "automl"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls", "multipart"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+dirs = "6"
+indicatif = "0.17"
+dialoguer = { version = "0.11", features = ["fuzzy-select"] }
+console = "0.15"
+comfy-table = "7"
+anyhow = "1"
+thiserror = "2"
+open = "5"
+base64 = "0.22"
+sha2 = "0.10"             # Device fingerprint hashing
+gethostname = "0.5"
+dotenvy = "0.15"           # .env file loading
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"

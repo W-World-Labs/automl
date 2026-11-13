@@ -1,0 +1,250 @@
+name: Public source CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: automl-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-audit:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check source and license boundaries
+        shell: python
+        run: |
+          import ast, json, pathlib, subprocess, tomllib, unicodedata, urllib.parse
+          names = {}
+          total = 0
+          for record in subprocess.check_output(['git', 'ls-tree', '-r', '-l', '-z', 'HEAD']).decode().split('\0'):
+              if not record:
+                  continue
+              metadata, name = record.split('\t', 1)
+              mode, kind, oid, size = metadata.split()
+              assert kind == 'blob' and mode in {'100644', '100755'}, 'Linked source requires separate review'
+              parts = pathlib.PurePosixPath(name).parts
+              assert not any(p in {'.gitea', '.venv', 'node_modules', '__pycache__', 'target', 'dist', 'build'} for p in parts)
+              assert not any(p.startswith('.env') and p != '.env.example' for p in parts)
+              assert pathlib.Path(name).suffix not in {'.pt', '.pth', '.ckpt', '.safetensors', '.gguf', '.onnx', '.npy', '.npz', '.parquet', '.pdf', '.tex'}
+              for index in range(1, len(parts) + 1):
+                  prefix = '/'.join(parts[:index])
+                  key = unicodedata.normalize('NFC', prefix).casefold()
+                  assert names.setdefault(key, prefix) == prefix, 'Case or Unicode path collision'
+              assert int(size) <= 10 * 1024 * 1024
+              total += int(size)
+              if name.endswith('.py'):
+                  ast.parse(pathlib.Path(name).read_text(), filename=name)
+              if pathlib.Path(name).name == 'Cargo.toml':
+                  manifest = tomllib.loads(pathlib.Path(name).read_text())
+                  tables = [manifest.get(key, {}) for key in ['dependencies', 'dev-dependencies', 'build-dependencies']]
+                  tables.append(manifest.get('workspace', {}).get('dependencies', {}))
+                  for table in tables:
+                      for dependency in table.values():
+                          if isinstance(dependency, dict):
+                              assert 'registry' not in dependency, 'Unreviewed registry override'
+                              if 'git' in dependency:
+                                  assert urllib.parse.urlsplit(dependency['git']).hostname == 'github.com'
+                                  rev = dependency.get('rev', '')
+                                  assert len(rev) == 40 and all(c in '0123456789abcdef' for c in rev)
+              if pathlib.Path(name).name == 'package-lock.json':
+                  for package in json.loads(pathlib.Path(name).read_text()).get('packages', {}).values():
+                      resolved = package.get('resolved')
+                      if resolved:
+                          assert urllib.parse.urlsplit(resolved).hostname in {'registry.npmjs.org', 'registry.npmmirror.com', 'github.com'}, 'Nonpublic npm dependency'
+          assert total <= 100 * 1024 * 1024
+          for name in ['LICENSE', 'THIRD-PARTY-NOTICES.md', 'licenses/CC-BY-4.0.txt', 'licenses/Apache-2.0.txt', 'licenses/vite-mit.txt']:
+              assert pathlib.Path(name).is_file(), 'Missing license notice'
+          for name in ['genesis', 'wifi-csi-har', 'openbb', 'template']:
+              assert pathlib.Path('archive/AutoML/papers', name, 'LICENSE').is_file()
+          print(json.dumps({'source_bytes': total, 'scope': 'application and original research implementation source; no datasets or weights'}))
+      - name: Scan source and complete reachable history
+        run: |
+          set -euo pipefail
+          audit="$RUNNER_TEMP/automl-source-audit"
+          mkdir "$audit"
+          curl --fail --show-error --location --retry 2 --connect-timeout 10 --max-time 90 \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o "$audit/gitleaks.tar.gz"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $audit/gitleaks.tar.gz" | sha256sum --check --strict
+          tar -xzf "$audit/gitleaks.tar.gz" -C "$audit" gitleaks
+          "$audit/gitleaks" git . --config=.gitleaks.toml --log-opts='--all --full-history --reflog -m' --redact=100 --ignore-gitleaks-allow --max-archive-depth=3 --max-decode-depth=5 --no-banner --report-path="$audit/history.json"
+          "$audit/gitleaks" dir . --config=.gitleaks.toml --redact=100 --ignore-gitleaks-allow --max-archive-depth=3 --max-decode-depth=5 --no-banner --report-path="$audit/files.json"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: automl-source-audit
+          path: ${{ runner.temp }}/automl-source-audit/*.json
+          if-no-files-found: error
+          retention-days: 7
+
+  application:
+    if: ${{ github.event.repository.private == false }}
+    needs: source-audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: automl
+          POSTGRES_PASSWORD: synthetic-ci-database-password
+          POSTGRES_DB: automl_test
+        ports: ['5432:5432']
+        options: --health-cmd 'pg_isready -U automl -d automl_test' --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://automl:synthetic-ci-database-password@127.0.0.1:5432/automl_test
+      CARGO_BUILD_JOBS: '1'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_INCREMENTAL: '0'
+      NPM_CONFIG_REGISTRY: https://registry.npmjs.org
+      SQLX_OFFLINE: 'true'
+      W_RADAR_CODE: ''
+      W_RADAR_ENDPOINT: ''
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Configure temporary build paths and exact Rust
+        run: |
+          echo "CARGO_HOME=$RUNNER_TEMP/automl-cargo" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_DIR=$RUNNER_TEMP/automl-target" >> "$GITHUB_ENV"
+          rustup toolchain install 1.96.0 --profile minimal --component rustfmt --component clippy
+          rustup override set 1.96.0
+      - name: Resolve missing public lockfiles natively
+        run: |
+          test -f Cargo.lock || cargo generate-lockfile
+          test -f archive/AutoML/Cargo.lock || cargo generate-lockfile --manifest-path archive/AutoML/Cargo.toml
+          mkdir "$RUNNER_TEMP/automl-locks"
+          cp Cargo.lock "$RUNNER_TEMP/automl-locks/current.Cargo.lock"
+          cp archive/AutoML/Cargo.lock "$RUNNER_TEMP/automl-locks/archive.Cargo.lock"
+          (cd "$RUNNER_TEMP/automl-locks" && sha256sum *.lock > SHA256SUMS)
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: automl-public-lockfiles
+          path: ${{ runner.temp }}/automl-locks/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Require reviewed committed public lockfiles
+        run: |
+          git ls-files --error-unmatch Cargo.lock archive/AutoML/Cargo.lock > /dev/null
+          git diff --exit-code -- Cargo.lock archive/AutoML/Cargo.lock
+          python3 - <<'PY'
+          import pathlib, tomllib
+          for name in ['Cargo.lock', 'archive/AutoML/Cargo.lock']:
+              for package in tomllib.loads(pathlib.Path(name).read_text())['package']:
+                  source = package.get('source', '')
+                  assert not source or source == 'registry+https://github.com/rust-lang/crates.io-index' or source.startswith('git+https://github.com/W-World-Labs/'), 'Nonpublic dependency source'
+                  assert package['name'] not in {'aws-lc-rs', 'aws-lc-sys'}, 'Unapproved crypto backend'
+          PY
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '22.16.0'
+      - name: Existing frontend checks and real embedded assets
+        working-directory: web
+        run: |
+          npm ci --cache "$RUNNER_TEMP/automl-npm"
+          npm run lint
+          npm test
+          npm run build
+      - name: Existing Rust checks and application tests
+        run: |
+          cargo fmt --all --check
+          cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+          cargo build --workspace --all-features --locked
+          cargo test --workspace --all-features --locked -- --test-threads=1
+      - name: Generated API contract has no drift
+        run: |
+          cargo run -q -p automl-server --locked -- --print-openapi > "$RUNNER_TEMP/automl-openapi.json"
+          cp "$RUNNER_TEMP/automl-openapi.json" web/openapi.json
+          (cd web && npm run gen:api)
+          git diff --exit-code -- web/openapi.json web/src/api/schema.d.ts
+      - name: Audit runtime dependency closure
+        run: |
+          cargo install cargo-audit --version 0.22.2 --locked --root "$RUNNER_TEMP/automl-audit"
+          "$RUNNER_TEMP/automl-audit/bin/cargo-audit" audit --file Cargo.lock
+
+  archived-frontend:
+    if: ${{ github.event.repository.private == false }}
+    needs: source-audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NPM_CONFIG_REGISTRY: https://registry.npmjs.org
+    defaults:
+      run:
+        working-directory: archive/AutoML/automl-web
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '22.16.0'
+      - name: Resolve a missing public npm lockfile natively
+        run: |
+          test -f package-lock.json || npm install --package-lock-only --ignore-scripts --cache "$RUNNER_TEMP/automl-archive-npm"
+          mkdir "$RUNNER_TEMP/automl-archive-lock"
+          cp package-lock.json "$RUNNER_TEMP/automl-archive-lock/package-lock.json"
+          (cd "$RUNNER_TEMP/automl-archive-lock" && sha256sum package-lock.json > SHA256SUMS)
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: automl-archived-frontend-lockfile
+          path: ${{ runner.temp }}/automl-archive-lock/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Require the reviewed committed lockfile
+        run: |
+          git ls-files --error-unmatch package-lock.json > /dev/null
+          git diff --exit-code -- package-lock.json
+      - name: Preserve the original archived frontend contracts
+        run: |
+          npm ci --cache "$RUNNER_TEMP/automl-archive-npm"
+          npm run lint
+          npm test
+          npm run build
+
+  source-package:
+    if: ${{ github.event.repository.private == false }}
+    needs: [application, archived-frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Archive exact committed source and notices
+        shell: python
+        run: |
+          import hashlib, json, os, pathlib, subprocess
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'automl-source'
+          output.mkdir()
+          commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip()
+          files = []
+          for name in subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', commit], text=True).splitlines():
+              data = subprocess.check_output(['git', 'show', commit + ':' + name])
+              files.append({'path': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
+          archive = output / ('automl-source-' + commit + '.tar.gz')
+          subprocess.run(['git', 'archive', '--format=tar.gz', '--prefix=automl-' + commit + '/', '--output=' + str(archive), commit], check=True)
+          manifest = output / 'SOURCE.json'
+          manifest.write_text(json.dumps({'commit': commit, 'tree': tree, 'scope': 'reviewed application and original research implementation source; no datasets, weights, private history or production activation', 'licenses': ['LICENSE', 'THIRD-PARTY-NOTICES.md', 'licenses/CC-BY-4.0.txt', 'licenses/Apache-2.0.txt', 'licenses/vite-mit.txt'], 'files': files}, indent=2) + '\n')
+          (output / 'SHA256SUMS').write_text(''.join(hashlib.sha256(path.read_bytes()).hexdigest() + '  ' + path.name + '\n' for path in [archive, manifest]))
+          print(json.dumps({'commit': commit, 'tree': tree, 'source_files': len(files)}))
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: automl-source
+          path: ${{ runner.temp }}/automl-source/*
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "distribution_scope": "complete current Auto.ml application and original archived research implementation source",
+  "private_history_included": false,
+  "production_activation_claimed": false,
+  "research_training_claimed": false,
+  "components": [
+    "automl-core shared wire contracts",
+    "automl-server API/data plane, authorization, migrations and tests",
+    "automl-cli local reproduction and signed evidence workflows",
+    "React/Vite web source and existing tests",
+    "original archived model, training, analysis and reproduction source"
+  ],
+  "licenses": {
+    "project_owned_application": "MIT; existing author notices retained",
+    "genesis_wifi_and_paper_templates": "CC-BY-4.0 as originally declared",
+    "openbb_experiment_callers": "Apache-2.0; paper class retains CC-BY-4.0",
+    "vite_scaffold_logo": "upstream MIT notice retained"
+  },
+  "excluded_categories": [
+    "private Git history and forge configuration",
+    "production deployment/CI inventories and runtime configuration",
+    "manuscripts, compiled papers and generated media without item-level review",
+    "installed dependencies, build caches and generated compiler state",
+    "research datasets, trained model weights and private user/provider data"
+  ],
+  "original_source_gaps": [
+    "Wi-Fi experiment imports experiments.data.loader, absent from the reviewed checkout and ignored source paths",
+    "OpenBB callers require implementation/configuration supplied separately through OPENBB_ROOT"
+  ],
+  "public_availability_holds": [
+    "The pinned @w/http-web public release asset must be built and independently verified before first publication",
+    "Public CI must generate, review and commit native Cargo and archived npm lockfiles before complete application validation"
+  ],
+  "source_preservation": {
+    "original_rust_files_retained": 119,
+    "original_python_files_retained": 32,
+    "original_typescript_files_retained": 48,
+    "original_sql_migrations_retained": 10,
+    "current_application_changes": "Four optional workspace_id: None initializers for the pinned public SDK; prior Rust statements and product assertions retained",
+    "archived_changes": "Public dependency/updater references and local example paths; model, training and evaluation implementation preserved"
+  },
+  "public_browser_dependency": {
+    "package": "@w/http-web",
+    "version": "0.1.0",
+    "source": "https://github.com/W-World-Labs/w-radar/tree/main/sdk/js/http-web",
+    "archive": "https://github.com/W-World-Labs/w-radar/releases/download/http-web-v0.1.0/w-http-web-0.1.0.tgz",
+    "runtime_implementation": "Original canonical source, no local shim"
+  }
+}

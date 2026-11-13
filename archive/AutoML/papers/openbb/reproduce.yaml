@@ -1,0 +1,99 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  Auto.ml — reproduce.yaml                                      ║
+# ║  OPENBB-001: OpenBB Multi-Modal LLM Training Framework          ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# ── Metadata ──────────────────────────────────────────────────────
+paper_id: "OPENBB-001"
+title: "OpenBB: A Modular Multi-Modal LLM Training Framework with YOLO-Style Auto-Adaptive Configuration"
+journal_slug: "auto-cs"
+paper_type: "research"
+authors:
+  - name: "W Intelligence Lab"
+    type: human
+    orcid: "0000-0001-0000-0001"
+    role: corresponding_author
+
+# ── Runtime ───────────────────────────────────────────────────────
+runtime:
+  python: "3.12"
+  package_manager: "uv"
+  bootstrap: "uv sync"
+
+# ── Environment Lock ─────────────────────────────────────────────
+lockfile:
+  pyproject: "pyproject.toml"
+  lock: "uv.lock"
+
+# ── Docker Reproduction ──────────────────────────────────────────
+docker:
+  platform_image: "automl/reproducer:latest"
+  run: "docker run --rm --gpus all --network none -v /path/to/openbb:/submission:ro -v /output:/output automl/reproducer:latest"
+
+# ── Experiments ──────────────────────────────────────────────────
+experiments:
+  - name: "config_pipeline_validation"
+    description: "Validate auto-adaptive config system: load all YAML configs, apply tier overrides, test reflection-based mapping"
+    command: "uv run python experiments/test_config.py"
+    seed: 42
+    expected_metrics:
+      configs_parsed:
+        value: 8
+        tolerance: 0
+      configs_built:
+        value: 8
+        tolerance: 0
+    expected_outputs:
+      - "outputs/config_validation.json"
+
+  - name: "pretrain_smoke_test"
+    description: "End-to-end pretrain on toy data: verify model builds, trains, and saves checkpoint"
+    command: "uv run python experiments/test_pretrain.py"
+    seed: 42
+    expected_metrics:
+      model_params_m:
+        value: 127.41
+        tolerance: 1.0
+      final_loss:
+        value: 12.0
+        tolerance: 1.0
+    expected_outputs:
+      - "outputs/pretrain_results.json"
+
+# ── Datasets & Models ────────────────────────────────────────────
+datasets:
+  - name: "toy_pretrain_zh"
+    source: url
+    url: "included" # bundled in data/toy/toy_pretrain_zh.jsonl
+    local_path: "data/toy/toy_pretrain_zh.jsonl"
+    format: "jsonl"
+    size: "~50KB"
+    license: "Apache-2.0"
+    description: "100 samples of Chinese web text for smoke testing"
+
+# ── Resource Tier ────────────────────────────────────────────────
+resources:
+  tier: "Micro"
+  gpu: true
+  gpu_vram: "8GB"
+  estimated_time: "< 5 minutes"
+  disk: "< 2 GB"
+
+# ── Storage ──────────────────────────────────────────────────────
+storage:
+  cdn_domain: "artifacts.auto.ml"
+  paper_prefix: "papers/OPENBB-001"
+  code_prefix: "code/OPENBB-001"
+  data_prefix: "data/"
+
+# ── Paper Compilation ────────────────────────────────────────────
+paper:
+  source: "openbb-paper.tex"
+  compiler: "pdflatex"
+  compile_command: "latexmk -pdf openbb-paper.tex"
+
+# ── Reference Evidence ───────────────────────────────────────────
+references:
+  manifest: "refs/refs-manifest.yaml"
+  total: 18
+  coverage_target: 0.90

@@ -1,0 +1,40 @@
+# Reference Evidence Manifest — TEMPLATE-001
+# ═══════════════════════════════════════════════════════════════════
+# Auto requires authors to provide verifiable source material
+# for EVERY cited reference. This manifest maps BibTeX keys to
+# their evidence files.
+#
+# Accepted evidence types (in order of preference):
+#   1. Original PDF      — publisher or preprint server
+#   2. HTML snapshot     — for web-only resources
+#   3. Archive link      — Wayback Machine URL
+#
+# Coverage requirement: ≥90% of cited references must have evidence.
+# The Reproducer checks this automatically.
+#
+# Filename convention: <bibtex_key>.pdf or <bibtex_key>.html
+# ═══════════════════════════════════════════════════════════════════
+
+# Example entries — replace with your actual references:
+#
+# references:
+#   smith2024deep:
+#     file: smith2024deep.pdf
+#     url: https://arxiv.org/abs/2401.12345
+#     type: preprint
+#     verified: true
+#
+#   johnson2023ml:
+#     file: johnson2023ml.pdf
+#     url: https://doi.org/10.1234/example
+#     type: journal
+#     verified: true
+#
+#   webresource2024:
+#     file: webresource2024.html
+#     url: https://example.com/resource
+#     type: website
+#     verified: true
+
+references: {}
+# ↑ Replace with your actual reference entries

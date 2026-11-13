@@ -1,0 +1,7 @@
+
+# Environment secrets
+.env.prod
+*.db
+*.db-shm
+*.db-wal
+.env

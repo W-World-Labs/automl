@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  Auto.ml — automl-render v1.0                                 ║
+# ║  Convert Markdown papers to styled PDF using Pandoc + LaTeX    ║
+# ║                                                                ║
+# ║  Usage:                                                        ║
+# ║    automl-render paper.md                     # → paper.pdf    ║
+# ║    automl-render paper.md -o output.pdf       # custom output  ║
+# ║    automl-render paper.md --review            # review mode    ║
+# ╚══════════════════════════════════════════════════════════════════╝
+set -euo pipefail
+
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+log()  { echo -e "${CYAN}[automl-render]${NC} $*"; }
+ok()   { echo -e "${GREEN}[    OK    ]${NC} $*"; }
+fail() { echo -e "${RED}[  FAIL  ]${NC} $*"; exit 1; }
+
+# ── Parse arguments ───────────────────────────────────────────────
+INPUT=""
+OUTPUT=""
+MODE="preprint"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -o|--output) OUTPUT="$2"; shift 2 ;;
+        --review)    MODE="review"; shift ;;
+        --accepted)  MODE="accepted"; shift ;;
+        --final)     MODE="final"; shift ;;
+        --preprint)  MODE="preprint"; shift ;;
+        -h|--help)
+            echo "Usage: automl-render <paper.md> [-o output.pdf] [--review|--accepted|--final]"
+            echo ""
+            echo "Converts an Auto.ml Markdown paper to a styled PDF."
+            echo "Requires: pandoc, tectonic (or pdflatex)"
+            exit 0 ;;
+        *) INPUT="$1"; shift ;;
+    esac
+done
+
+[ -z "$INPUT" ] && fail "No input file. Usage: automl-render paper.md"
+[ -f "$INPUT" ] && log "Input: $INPUT" || fail "File not found: $INPUT"
+
+# Default output
+if [ -z "$OUTPUT" ]; then
+    OUTPUT="${INPUT%.md}.pdf"
+fi
+
+# ── Check dependencies ────────────────────────────────────────────
+log "Checking dependencies..."
+
+if ! command -v pandoc &>/dev/null; then
+    log "Installing pandoc..."
+    if command -v brew &>/dev/null; then
+        brew install pandoc
+    elif command -v apt-get &>/dev/null; then
+        sudo apt-get install -y pandoc
+    else
+        fail "pandoc not found. Install from https://pandoc.org"
+    fi
+fi
+ok "pandoc $(pandoc --version | head -1)"
+
+# Check for LaTeX engine
+LATEX_ENGINE=""
+if command -v tectonic &>/dev/null; then
+    LATEX_ENGINE="tectonic"
+elif command -v xelatex &>/dev/null; then
+    LATEX_ENGINE="xelatex"
+elif command -v pdflatex &>/dev/null; then
+    LATEX_ENGINE="pdflatex"
+else
+    log "No LaTeX engine found. Installing tectonic..."
+    if command -v brew &>/dev/null; then
+        brew install tectonic
+        LATEX_ENGINE="tectonic"
+    elif command -v cargo &>/dev/null; then
+        cargo install tectonic
+        LATEX_ENGINE="tectonic"
+    else
+        fail "No LaTeX engine available. Install tectonic: https://tectonic-typesetting.github.io"
+    fi
+fi
+ok "LaTeX engine: $LATEX_ENGINE"
+
+# ── Locate template ──────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLS_FILE=""
+
+# Search order: same dir as input → template dir → script dir
+for candidate in \
+    "$(dirname "$INPUT")/automl-paper.cls" \
+    "$SCRIPT_DIR/../automl-paper.cls" \
+    "$SCRIPT_DIR/automl-paper.cls"; do
+    if [ -f "$candidate" ]; then
+        CLS_FILE="$candidate"
+        break
+    fi
+done
+
+if [ -z "$CLS_FILE" ]; then
+    log "automl-paper.cls not found — using pandoc default styling"
+    USE_CLS=false
+else
+    ok "Template: $CLS_FILE"
+    USE_CLS=true
+fi
+
+# ── Find references ──────────────────────────────────────────────
+BIB_FILE=""
+INPUT_DIR="$(dirname "$INPUT")"
+
+for candidate in \
+    "$INPUT_DIR/references.bib" \
+    "$INPUT_DIR/references.yaml"; do
+    if [ -f "$candidate" ]; then
+        BIB_FILE="$candidate"
+        break
+    fi
+done
+
+if [ -n "$BIB_FILE" ]; then
+    ok "Bibliography: $BIB_FILE"
+    BIB_ARGS="--bibliography=$BIB_FILE --citeproc"
+else
+    log "No references file found — citations will not be resolved"
+    BIB_ARGS=""
+fi
+
+# ── Build pandoc command ──────────────────────────────────────────
+log "Rendering to PDF..."
+
+PANDOC_ARGS=(
+    "$INPUT"
+    -o "$OUTPUT"
+    --pdf-engine="$LATEX_ENGINE"
+    --number-sections
+    --highlight-style=tango
+    -V geometry:margin=1in
+    -V fontsize=10pt
+    -V colorlinks=true
+    -V linkcolor=NavyBlue
+    -V citecolor=teal
+    -V urlcolor=Blue
+    -V papersize=letter
+    -V header-includes='\usepackage{booktabs}'
+    -V header-includes='\usepackage{fontawesome5}'
+)
+
+# Add bibliography if found
+if [ -n "$BIB_ARGS" ]; then
+    PANDOC_ARGS+=($BIB_ARGS)
+fi
+
+# Add class file if found
+if [ "$USE_CLS" = true ]; then
+    PANDOC_ARGS+=(-V documentclass=automl-paper)
+    PANDOC_ARGS+=(-V classoption="$MODE")
+    # Copy cls to output dir
+    cp "$CLS_FILE" "$(dirname "$OUTPUT")/" 2>/dev/null || true
+fi
+
+# Execute
+if pandoc "${PANDOC_ARGS[@]}" 2>&1; then
+    SIZE=$(ls -lh "$OUTPUT" 2>/dev/null | awk '{print $5}')
+    ok "Output: $OUTPUT ($SIZE)"
+else
+    fail "Rendering failed. Check pandoc output above."
+fi
+
+echo ""
+log "Done! Open with: open $OUTPUT"
