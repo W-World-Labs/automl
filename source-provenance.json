@@ -28,9 +28,7 @@
     "Wi-Fi experiment imports experiments.data.loader, absent from the reviewed checkout and ignored source paths",
     "OpenBB callers require implementation/configuration supplied separately through OPENBB_ROOT"
   ],
-  "public_availability_holds": [
-    "Public CI must generate, review and commit native Cargo and archived npm lockfiles before complete application validation"
-  ],
+  "public_availability_holds": [],
   "source_preservation": {
     "original_rust_files_retained": 119,
     "original_python_files_retained": 32,
@@ -48,5 +46,14 @@
     "source_commit": "57314c8f904927740962ae178ef4b7ab6e239389",
     "archive_sha256": "1b21d115f3a3d6b4c254cd7c519132a4bb7c09187515f55dc2e9cbf375f92577",
     "archive_integrity": "sha512-sUNEBQNlHBGt8QqwmqJCW0O9KSYpu4P+EAaPV5Y/o/lYLMwh8XzgSdcU+OOPb+i724WFjeBUQhqefUVVVUpBWw=="
+  },
+  "native_lock_generation": {
+    "run": "https://github.com/W-World-Labs/automl/actions/runs/43515951927",
+    "source_commit": "8879af2ff4f56df9a635e6fce0636aa5a60429b6",
+    "sha256": {
+      "Cargo.lock": "44c28f351ae60c186504cb51f51e9ed41e57a08eba90ba44f3bef96b5b21612e",
+      "archive/AutoML/Cargo.lock": "88aa2514c527cfc6118ee06fdfef2005d15f53054c3a5781759b6aa9f12fd18c",
+      "archive/AutoML/automl-web/package-lock.json": "61d2275ac09f7ade381a44dddeebcb145cea5bce7889de4fc385477763de0a7d"
+    }
   }
 }
