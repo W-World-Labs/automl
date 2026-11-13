@@ -80,7 +80,7 @@ runs the existing current-application Rust/frontend checks and packages committe
 source with its manifest, notices and checksums. It uses synthetic PostgreSQL and
 loopback test services, not production credentials or providers. No paper training,
 model download, dataset download or hardware performance test is performed.
-The archived frontend uses npm 11.19.1 for its original peer-dependency graph.
+The frontend jobs use npm 11.19.1 for the original peer-dependency graphs.
 
 The old private-runner/deployment contract scripts are preserved as historical
 source, but their operator-specific environment is outside the public validation

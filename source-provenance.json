@@ -28,7 +28,9 @@
     "Wi-Fi experiment imports experiments.data.loader, absent from the reviewed checkout and ignored source paths",
     "OpenBB callers require implementation/configuration supplied separately through OPENBB_ROOT"
   ],
-  "public_availability_holds": [],
+  "public_availability_holds": [
+    "PUBLIC CI must regenerate and review the current frontend lock within its original declared ranges for dependency security fixes before complete validation"
+  ],
   "source_preservation": {
     "original_rust_files_retained": 119,
     "original_python_files_retained": 32,

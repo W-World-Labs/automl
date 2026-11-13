@@ -153,6 +153,28 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: '22.16.0'
+      - name: Pin the current frontend npm resolver
+        run: |
+          npm install --global npm@11.19.1 --ignore-scripts --no-audit --no-fund --cache "$RUNNER_TEMP/automl-npm"
+          test "$(npm --version)" = '11.19.1'
+      - name: Resolve a missing current frontend lockfile natively
+        working-directory: web
+        run: |
+          test -f package-lock.json || npm install --package-lock-only --ignore-scripts --cache "$RUNNER_TEMP/automl-npm"
+          mkdir "$RUNNER_TEMP/automl-web-lock"
+          cp package-lock.json "$RUNNER_TEMP/automl-web-lock/package-lock.json"
+          (cd "$RUNNER_TEMP/automl-web-lock" && sha256sum package-lock.json > SHA256SUMS)
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: automl-current-frontend-lockfile
+          path: ${{ runner.temp }}/automl-web-lock/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Require the reviewed committed current frontend lockfile
+        working-directory: web
+        run: |
+          git ls-files --error-unmatch package-lock.json > /dev/null
+          git diff --exit-code -- package-lock.json
       - name: Existing frontend checks and real embedded assets
         working-directory: web
         run: |
