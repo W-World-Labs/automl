@@ -28,9 +28,7 @@
     "Wi-Fi experiment imports experiments.data.loader, absent from the reviewed checkout and ignored source paths",
     "OpenBB callers require implementation/configuration supplied separately through OPENBB_ROOT"
   ],
-  "public_availability_holds": [
-    "PUBLIC CI must regenerate and review the current frontend lock within its original declared ranges for dependency security fixes before complete validation"
-  ],
+  "public_availability_holds": [],
   "source_preservation": {
     "original_rust_files_retained": 119,
     "original_python_files_retained": 32,
@@ -57,5 +55,10 @@
       "archive/AutoML/Cargo.lock": "88aa2514c527cfc6118ee06fdfef2005d15f53054c3a5781759b6aa9f12fd18c",
       "archive/AutoML/automl-web/package-lock.json": "61d2275ac09f7ade381a44dddeebcb145cea5bce7889de4fc385477763de0a7d"
     }
+  },
+  "current_frontend_lock_generation": {
+    "run": "https://github.com/W-World-Labs/automl/actions/runs/43518269964",
+    "source_commit": "10e24c8f07e675c4b015d7cacfe3b12913ec7dcb",
+    "sha256": "7de4aefd092ff638638ddd4a44abfa84ed90d21e7414776dcc89171d6489306d"
   }
 }
