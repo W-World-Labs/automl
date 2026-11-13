@@ -208,6 +208,14 @@ jobs:
         run: |
           git ls-files --error-unmatch package-lock.json > /dev/null
           git diff --exit-code -- package-lock.json
+          python3 - <<'PY'
+          import json, pathlib
+          reviewed = json.loads(pathlib.Path('../../../source-provenance.json').read_text())['public_browser_dependency']
+          package = json.loads(pathlib.Path('package-lock.json').read_text())['packages']['node_modules/@w/http-web']
+          assert package['version'] == reviewed['version']
+          assert package['resolved'] == reviewed['archive']
+          assert package['integrity'] == reviewed['archive_integrity'], 'Browser package differs from the reviewed real archive'
+          PY
       - name: Preserve the original archived frontend contracts
         run: |
           npm ci --cache "$RUNNER_TEMP/automl-archive-npm"

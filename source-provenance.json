@@ -29,7 +29,7 @@
     "OpenBB callers require implementation/configuration supplied separately through OPENBB_ROOT"
   ],
   "public_availability_holds": [
-    "The pinned @w/http-web public release asset must be built and independently verified before first publication",
+    "The pinned @w/http-web public release URL must be available and match the reviewed archive before first publication",
     "Public CI must generate, review and commit native Cargo and archived npm lockfiles before complete application validation"
   ],
   "source_preservation": {
@@ -43,8 +43,11 @@
   "public_browser_dependency": {
     "package": "@w/http-web",
     "version": "0.1.0",
-    "source": "https://github.com/W-World-Labs/w-radar/tree/main/sdk/js/http-web",
+    "source": "https://github.com/W-World-Labs/w-radar/tree/57314c8f904927740962ae178ef4b7ab6e239389/sdk/js/http-web",
     "archive": "https://github.com/W-World-Labs/w-radar/releases/download/http-web-v0.1.0/w-http-web-0.1.0.tgz",
-    "runtime_implementation": "Original canonical source, no local shim"
+    "runtime_implementation": "Original canonical source, no local shim",
+    "source_commit": "57314c8f904927740962ae178ef4b7ab6e239389",
+    "archive_sha256": "1b21d115f3a3d6b4c254cd7c519132a4bb7c09187515f55dc2e9cbf375f92577",
+    "archive_integrity": "sha512-sUNEBQNlHBGt8QqwmqJCW0O9KSYpu4P+EAaPV5Y/o/lYLMwh8XzgSdcU+OOPb+i724WFjeBUQhqefUVVVUpBWw=="
   }
 }
